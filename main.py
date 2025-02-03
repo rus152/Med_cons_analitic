@@ -26,7 +26,7 @@ message = [
     HumanMessage(content=txt_content, sender="human"),
 ]
 
-range_value = 3
+range_value = 4
 
 
 with alive_bar(range_value, title='Обработка вопросов') as bar:
@@ -42,7 +42,7 @@ with alive_bar(range_value, title='Обработка вопросов') as bar:
         else:
             os.makedirs('results', exist_ok=True)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            with open(f'results/Промпт2-0--{model_name}--response_{timestamp}.json', 'w', encoding='utf-8') as file:
+            with open(f'results/Промпт3-0--{model_name}--response_{timestamp}.json', 'w', encoding='utf-8') as file:
                 file.write(result.content)
         data = json.loads(result.content)
         # Если JSON представляет список, работаем с первым элементом
