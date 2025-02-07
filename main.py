@@ -41,7 +41,7 @@ for i in range(6):
             if i == 2:
                 os.makedirs('results', exist_ok=True)
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                file_path = f'results/Промпт4-0--gpt-4o--response_{timestamp}.json'
+                file_path = f'results/Промпт4-0--gpt-4o--response_{timestamp}.txt'
                 # Запись данных в файл
                 with open(file_path, 'w', encoding='utf-8') as file:
                     combined_content = "\n".join([result[j].content for j in range(3)])
