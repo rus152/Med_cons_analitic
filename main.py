@@ -5,74 +5,53 @@ import os
 import json
 from alive_progress import alive_bar
 
-
-
 with open("res/5.txt", 'r', encoding='utf-8') as file:
-    txt_content = file.read()
+    dialog = file.read()
 
 with open("prompt.txt", 'r', encoding='utf-8') as file:
     prompt = file.read()
 
-model_name = "o3-mini"
+qz = {}
 
-# Создаем модель ChatOpenAI
-model = ChatOpenAI(model=model_name)
+for i in range(3):
+    with open(f"qz/{i}.txt", 'r', encoding='utf-8') as file:
+        qz[i] = file.read()
 
-message = [
-    SystemMessage(
-        content=prompt,
-        sender="system",
-    ),
-    HumanMessage(content=txt_content, sender="human"),
-]
+model = ChatOpenAI(model="gpt-4o", temperature=0.000000000000000001)
 
-range_value = 4
+result = {}
 
-
-with alive_bar(range_value, title='Обработка вопросов') as bar:
-    for i in range(range_value):
-        # Отправляем текст Excel-файла в модель
-        result = model.invoke(message)
-        if (result.content == "Error. The text is not a dialogue."):
-            print("Ошибка, удостоверьтесь, что текст является диалогом.\n")
-            exit()
-        elif (result.content == "Error. The dialog doesn't look right."):
-            print("Ошибка, диалог не выглядит правильным.\n")
-            exit()
-        else:
-            os.makedirs('results', exist_ok=True)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            with open(f'results/Промпт3-0--{model_name}--response_{timestamp}.json', 'w', encoding='utf-8') as file:
-                file.write(result.content)
-        data = json.loads(result.content)
-        # Если JSON представляет список, работаем с первым элементом
-        if isinstance(data, list) and data:
-            item = data[0]
-            # Вывод информации из "Completion_of_the_checklist"
-            checklist = item.get("Completion_of_the_checklist", "Нет информации")
-            print("Completion_of_the_checklist:", checklist)
-            # Подсчёт количества ответов True (учитываем True, "true" и "True")
-            true_count = 0
-            # Проходим по списку вопросов
-            for question in item.get("Questions", []):
-                # Для каждого вопроса проходим по его результатам
-                for result_item in question.get("Results", []):
-                    # Получаем значение ключа "result"
-                    res = result_item.get("result")
-                    # Если значение - булево True
-                    if res is True:
-                        true_count += 1
-                    # Если значение строковое и его значение "true" (без учёта регистра)
-                    elif isinstance(res, str) and res.lower() == "true":
-                        true_count += 1
-            print("Количество ответов True:", true_count)
-        else:
-            print("Полученные данные не соответствуют ожидаемому формату.")
-        #print(result.content)
-        print(i+1)
-        bar()
-
-
-
-
-
+for i in range(6):
+    with alive_bar(3, title='Обработка вопросов') as bar:
+        for i in range(3):
+            message = [
+            SystemMessage(
+            content=prompt + "\n" + dialog,
+            sender="system",
+            ),
+            HumanMessage(content="Задавал ли врач эти вопросы?\n" + qz[i], sender="human"),
+            ]
+            result[i] = model.invoke(message)
+            if (result[i].content == "Error. The text is not a dialogue."):
+                print("Ошибка, удостоверьтесь, что текст является диалогом.\n")
+                exit()
+            elif (result[i].content == "Error. The dialog doesn't look right."):
+                print("Ошибка, диалог не выглядит правильным.\n")
+                exit()
+            if i == 2:
+                os.makedirs('results', exist_ok=True)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                file_path = f'results/Промпт4-0--gpt-4o--response_{timestamp}.json'
+                # Запись данных в файл
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    combined_content = "\n".join([result[j].content for j in range(3)])
+                    file.write(combined_content)
+                # Чтение данных из файла
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    lines = file.readlines()
+                    count = 0
+                    for line in lines:
+                        if line.strip() == "true":
+                            count += 1
+                    print(f'Количество строк с "true": {count}')
+            bar()
