@@ -5,7 +5,7 @@ import os
 import json
 from alive_progress import alive_bar
 
-with open("res/5.txt", 'r', encoding='utf-8') as file:
+with open("C:\\Users\\RuslanPC\\Downloads\\Telegram Desktop\\1.txt", 'r', encoding='utf-8') as file:
     dialog = file.read()
 
 with open("prompt.txt", 'r', encoding='utf-8') as file:
@@ -13,7 +13,7 @@ with open("prompt.txt", 'r', encoding='utf-8') as file:
 
 qz = {}
 
-for i in range(3):
+for i in range(7):
     with open(f"qz/{i}.txt", 'r', encoding='utf-8') as file:
         qz[i] = file.read()
 
@@ -22,8 +22,8 @@ model = ChatOpenAI(model="gpt-4o", temperature=0.000000000000000001)
 result = {}
 
 for i in range(6):
-    with alive_bar(3, title='Обработка вопросов') as bar:
-        for i in range(3):
+    with alive_bar(7, title='Обработка вопросов') as bar:
+        for i in range(7):
             message = [
             SystemMessage(
             content=prompt + "\n" + dialog,
@@ -38,13 +38,13 @@ for i in range(6):
             elif (result[i].content == "Error. The dialog doesn't look right."):
                 print("Ошибка, диалог не выглядит правильным.\n")
                 exit()
-            if i == 2:
+            if i == 6:
                 os.makedirs('results', exist_ok=True)
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 file_path = f'results/Промпт4-0--gpt-4o--response_{timestamp}.txt'
                 # Запись данных в файл
                 with open(file_path, 'w', encoding='utf-8') as file:
-                    combined_content = "\n".join([result[j].content for j in range(3)])
+                    combined_content = "\n".join([result[j].content for j in range(7)])
                     file.write(combined_content)
                 # Чтение данных из файла
                 with open(file_path, 'r', encoding='utf-8') as file:
